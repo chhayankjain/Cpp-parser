@@ -1,0 +1,73 @@
+
+p_prime: program 
+program: elements mainFunction
+
+elements: structs elements| functions_or_declarations elements| classes elements | eps
+
+structs: STRUCT ID '{' declarations_only '}' ';'
+
+classes: CLASS ID '{' specifier ':' class_body '}' ';' 
+specifier: private | public | protected
+class_body: functions_or_declarations class_body | eps
+functions_or_declarations: DTYPE ID next ';'
+next: functions | declarations | eps
+
+functions: '(' parameter_list ')' '{' declarations_only statement_list '}';
+parameter_list: DTYPE ID id_prime | eps
+id_prime: COMMA parameter_list| '[' NUMBER ']' id_prime | eps
+
+mainFunction: MAIN '(' ')' '{' declarations_only statement_list '}';
+
+declarations: identifier_list ';'| eps
+declarations_only: DTYPE identifier_list ';' declarations_only | eps
+
+identifier_list: ID id1;
+id1: COMMA identifier_list |'[' NUMBER ']' id1| ;
+
+statement_list: statement statement_list| ;
+statement: assign_stat_or_function_call ';'| decision_stat | looping_stat| return_stat | input_stat | output_stat| switch_stat
+
+assign_stat_or_function_call: ID assign_function_prime;
+
+assign_function_prime: function_call|assign_stat;
+function_call: '(' argument_list ')' | '.' ID f_prime 
+f_prime: '.' f_prime| function_call
+argument_list: identifier_list| eps
+
+assign_stat:  '=' expression | '.' ID a_prime
+a_prime: '.' a_prime | assign_stat
+
+return_stat : RETURN factor ';' 
+
+input_stat:CIN '>''>' ID input_prime ';' 
+input_prime : '>' '>' ID input_prime| eps
+
+output_stat: COUT '<' '<' LITERAL output_prime ';' | COUT '<' '<' NUMBER output_prime ';' | COUT '<' '<' ID output_prime ';' 
+output_prime: '<' '<' LITERAL output_prime|'<' '<' ID output_prime|'<' '<' NUMBER output_prime| eps
+
+assign_stat_only:  ID assign_stat_prime
+assign_stat_prime: '=' expression | '.' assign_stat_only
+
+expression: simple_expression eprime;
+
+eprime: relop simple_expression| eps
+simple_expression: term seprime
+seprime: addop term seprime| eps
+term: factor tprime
+tprime: mulop factor tprime| eps
+factor: ID|NUMBER
+
+decision_stat: IF '(' expression ')' '{' statement_list '}' dprime
+dprime: ELIF '(' expression ')' '{' statement_list '}' dprime | dp_prime 
+dp_prime: ELSE '{' statement_list '}' | eps
+
+switch_stat: SWITCH '(' ID ')' '{' case_stat '}'
+case_stat: CASE NUMBER ':' statement_list break_stat case_stat | default | eps
+break_stat: BREAK ';' | eps
+default: DEFAULT ':' statement_list
+
+looping_stat: WHILE '(' expression ')' '{' statement_list '}'| FOR '(' assign_stat_only ';' expression ';' assign_stat_only ')' '{' statement_list '}'
+
+relop: '>'|'<'|'<' '='|'>' '=' | '!' '='
+addop: '+'|'-'
+mulop: '*' | '/' | '%'
